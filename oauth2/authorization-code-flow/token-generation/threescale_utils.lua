@@ -4,33 +4,36 @@ local M = {} -- public interface
 -- private
 -- Logging Helpers
 function M.show_table(t, ...)
-   local indent = 0 --arg[1] or 0
-   local indentStr=""
-   for i = 1,indent do indentStr=indentStr.."  " end
-
-   for k,v in pairs(t) do
-     if type(v) == "table" then
-	msg = indentStr .. M.show_table(v or '', indent+1)
-     else
-	msg = indentStr ..  k .. " => " .. v
-     end
-     M.log_message(msg)
-   end
+  local indent = 0 --arg[1] or 0
+  local indentStr=""
+  for i = 1,indent do 
+    indentStr=indentStr.."  " 
+  end
+  
+  for k,v in pairs(t) do
+    if type(v) == "table" then
+      msg = indentStr .. M.show_table(v or '', indent+1)
+    else
+      msg = indentStr ..  k .. " => " .. v
+    end
+    
+    M.log_message(msg)
+  end
 end
 
 function M.log_message(str)
-   ngx.log(0, str)
+  ngx.log(0, str)
 end
 
 function M.newline()
-   ngx.log(0,"  ---   ")
+  ngx.log(0,"  ---   ")
 end
 
 function M.log(content)
   if type(content) == "table" then
-     M.log_message(M.show_table(content))
+    M.log_message(M.show_table(content))
   else
-     M.log_message(content)
+    M.log_message(content)
   end
   M.newline()
 end
@@ -39,13 +42,13 @@ end
 
 -- Table Helpers
 function M.keys(t)
-   local n=0
-   local keyset = {}
-   for k,v in pairs(t) do
-      n=n+1
-      keyset[n]=k
-   end
-   return keyset
+  local n=0
+  local keyset = {}
+  for k,v in pairs(t) do
+    n=n+1
+    keyset[n]=k
+  end
+  return keyset
 end
 -- End Table Helpers
 
@@ -102,41 +105,6 @@ end
 function M.missing_args(text)
   ngx.say(text)
   ngx.exit(ngx.HTTP_OK)
-end
-
----
--- Builds a query string from a table.
---
--- This is the inverse of <code>parse_query</code>.
--- @param query A dictionary table where <code>table['name']</code> =
--- <code>value</code>.
--- @return A query string (like <code>"name=value2&name=value2"</code>).
------------------------------------------------------------------------------
-function M.build_query(query)
-  local qstr = ""
-
-  for i,v in pairs(query) do
-    qstr = qstr .. i .. '=' .. v .. '&'
-  end
-  return string.sub(qstr, 0, #qstr-1)
-end
-
---[[
-  Aux function to split a string
-]]--
-
-function string:split(delimiter)
-  local result = { }
-  local from = 1
-  local delim_from, delim_to = string.find( self, delimiter, from )
-  if delim_from == nil then return {self} end
-  while delim_from do
-    table.insert( result, string.sub( self, from , delim_from-1 ) )
-    from = delim_to + 1
-    delim_from, delim_to = string.find( self, delimiter, from )
-  end
-  table.insert( result, string.sub( self, from ) )
-  return result
 end
 
 return M
